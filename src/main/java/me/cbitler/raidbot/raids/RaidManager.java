@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Serves as a manager for all of the raids. This includes creating, loading, and deleting raids
@@ -56,15 +57,14 @@ public class RaidManager {
                         	for (Emote emote : emoteList)
                         		message1.addReaction(emote).complete(); // complete will block until the reaction was added -> reactions are always in same order
                         } catch (Exception excp) {
-                        	System.out.println("Could not add all reactions to the event message. At least one emoji was null.");
+                            RaidBot.log(Level.SEVERE, "Could not add all reactions to the event message. At least one emoji was null.", excp);
                         }
                     } else {
                         message1.delete().queue();
                     }
                 });
             } catch (Exception e) {
-                System.out.println("Error encountered in sending message.");
-                e.printStackTrace();
+                RaidBot.log(Level.SEVERE, "Error encountered in sending message.", e);
                 throw e;
             }
         }
@@ -199,8 +199,8 @@ public class RaidManager {
                     	int amnt = Integer.parseInt(parts[0]);
                     	String role = parts[1];
                         raid.roles.add(new RaidRole(amnt, role));
-                    } catch (Exception excp) {
-                    	System.out.println("Invalid format for role with amount: " + roleAndAmount);
+                    } catch (NumberFormatException excp) {
+                        RaidBot.log(Level.SEVERE, "Invalid format for role with amount: " + roleAndAmount + ". " + excp.getMessage());
                     }                    
                 }
                 if (raid.roles.size() > 0) // this should always be the case
@@ -211,8 +211,8 @@ public class RaidManager {
                 		db.update("DELETE FROM `raids` WHERE `raidId` = ?", new String[]{ messageId });
                 		db.update("DELETE FROM `raidUsers` WHERE `raidId` = ?", new String[]{ messageId });
                         db.update("DELETE FROM `raidUsersFlexRoles` WHERE `raidId` = ?", new String[]{messageId});
-                	} catch (Exception excp) {
-                		System.out.println("Could not delete raid without roles from database.");
+                    } catch (SQLException excp) {
+                        RaidBot.log(Level.SEVERE, "Could not delete raid without roles from database.", excp);
                 	}
                 }
             }
@@ -253,8 +253,7 @@ public class RaidManager {
                 raid.updateMessage();
             }
         } catch (SQLException e) {
-            System.out.println("Couldn't load events... exiting.");
-            e.printStackTrace();
+            RaidBot.log(Level.SEVERE, "Couldn't load events... exiting.", e);
             System.exit(1);
         }
     }
@@ -294,8 +293,8 @@ public class RaidManager {
                 });
                 RaidBot.getInstance().getDatabase().update("DELETE FROM `raidUsersFlexRoles` WHERE `raidId` = ?",
                         new String[]{messageId});
-            } catch (Exception e) {
-                System.out.println("Error encountered deleting event.");
+            } catch (SQLException e) {
+                RaidBot.log(Level.SEVERE, "Error encountered deleting event.", e);
             }
 
             return true;

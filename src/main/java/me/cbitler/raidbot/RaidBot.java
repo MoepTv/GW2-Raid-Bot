@@ -21,10 +21,14 @@ import net.dv8tion.jda.core.entities.User;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 
 /**
  * Class representing the raid bot itself.
@@ -37,6 +41,7 @@ import java.util.Set;
  */
 public class RaidBot {
     private static RaidBot instance;
+    private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
     private JDA jda;
 
     HashMap<String, CreationStep> creation = new HashMap<String, CreationStep>();
@@ -88,6 +93,25 @@ public class RaidBot {
                 }
             }
         }).start();
+    }
+
+    /**
+     * Log a message with a certain level. Currently only uses System.out.println and no logging framework.
+     * @param level The message level
+     * @param message The message to log
+     */
+    public static void log(Level level, String message, Throwable throwable) {
+        log(level, message + " " + throwable.getMessage());
+        throwable.printStackTrace();
+    }
+
+    /**
+     * Log a message with a certain level. Currently only uses System.out.println and no logging framework.
+     * @param level The message level
+     * @param message The message to log
+     */
+    public static void log(Level level, String message) {
+        System.out.println(TIME_FORMAT.format(new Date(System.currentTimeMillis())) + " " + level.getName() + " " + message);
     }
 
     /**

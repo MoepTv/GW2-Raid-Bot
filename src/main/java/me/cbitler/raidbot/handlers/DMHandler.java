@@ -15,6 +15,8 @@ import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
+import java.util.logging.Level;
+
 /**
  * Handle direct messages sent to the bot
  * @author Christopher Bitler
@@ -146,7 +148,7 @@ public class DMHandler extends ListenerAdapter {
 
         if(e.getMessage().getAttachments().size() > 0 && e.getChannelType() == ChannelType.PRIVATE) {
             for(Message.Attachment attachment : e.getMessage().getAttachments()) {
-                System.out.println(attachment.getFileName());
+                RaidBot.log(Level.FINER, attachment.getFileName());
                 if(attachment.getFileName().endsWith(".evtc") || attachment.getFileName().endsWith(".evtc.zip")) {
                     new Thread(new LogParser(e.getChannel(), attachment)).start();
                 }

@@ -1,5 +1,6 @@
 package me.cbitler.raidbot.logs;
 
+import me.cbitler.raidbot.RaidBot;
 import me.cbitler.raidbot.utility.EnvVariables;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.PrivateChannel;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Upload log files sent to the bot to a local parser, dps.report, and GW2 Raidar
@@ -68,7 +70,7 @@ public class LogParser implements Runnable {
 
         try {
             Process p = Runtime.getRuntime().exec("dotnet parser/GuildWars2EliteInsights.dll \"parser/" + attachment.getFileName() + "\" \"/var/www/html/logs/\"");
-            System.out.println("dotnet parser/GuildWars2EliteInsights.dll \"parser/" + attachment.getFileName() + "\" \"/var/www/html/logs/\"");
+            RaidBot.log(Level.FINER, "dotnet parser/GuildWars2EliteInsights.dll \"parser/" + attachment.getFileName() + "\" \"/var/www/html/logs/\"");
             String line;
             BufferedReader bri = new BufferedReader
                     (new InputStreamReader(p.getInputStream()));
@@ -117,7 +119,7 @@ public class LogParser implements Runnable {
             channel.sendMessage("dps.report done. Uploading to gw2raidar").queue();
             String tokenResponse =
                     this.handleCurl(new String[] {"curl", "-s", "-F", "username=" + variables.getValue("RAIDAR_USERNAME"), "-F", "password=" + variables.getValue("RAIDAR_PASSWORD"), "https://www.gw2raidar.com/api/v2/token"});
-            System.out.println(tokenResponse);
+            RaidBot.log(Level.FINER, tokenResponse);
             JSONObject token =
                     (JSONObject) parser.parse(tokenResponse);
             String tokenString = (String) token.get("token");
@@ -132,7 +134,7 @@ public class LogParser implements Runnable {
                 channel.sendMessage("Uploaded to GW2Raidar (no url provided)").queue();
             }
         } catch (IOException | InterruptedException | ParseException e) {
-            e.printStackTrace();
+            RaidBot.log(Level.SEVERE, "An error occured while parsing the log", e);
         }
     }
 

@@ -1,6 +1,9 @@
 package me.cbitler.raidbot.database;
 
+import me.cbitler.raidbot.RaidBot;
+
 import java.sql.*;
+import java.util.logging.Level;
 
 /**
  * Class for managing the SQLite database for this bot
@@ -65,15 +68,14 @@ public class Database {
         try {
             connection = DriverManager.getConnection(url);
         } catch (SQLException e) {
-            System.out.println("Database connection error");
+            RaidBot.log(Level.SEVERE, "Database connection error", e);
             System.exit(1);
         }
 
         try {
             tableInits();
         } catch (SQLException e) {
-            System.out.println("Couldn't create tables");
-            e.printStackTrace();
+            RaidBot.log(Level.SEVERE, "Couldn't create tables", e);
             System.exit(1);
         }
     }
