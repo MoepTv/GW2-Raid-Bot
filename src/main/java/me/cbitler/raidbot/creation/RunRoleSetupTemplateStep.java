@@ -3,10 +3,10 @@ package me.cbitler.raidbot.creation;
 import java.util.List;
 
 import me.cbitler.raidbot.RaidBot;
-import me.cbitler.raidbot.utility.RoleTemplates;
+import me.cbitler.raidbot.raids.templates.Template;
+import me.cbitler.raidbot.raids.templates.TemplateManager;
 
 import me.cbitler.raidbot.raids.PendingRaid;
-import me.cbitler.raidbot.raids.RaidRole;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 
 /**
@@ -17,12 +17,10 @@ import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 public class RunRoleSetupTemplateStep implements CreationStep {
 
     CreationStep nextStep;
-    List<RaidRole[]> templates;
-    List<String> templateNames;
+    List<Template> templates;
     
     public RunRoleSetupTemplateStep() {
-		this.templates = RoleTemplates.getAllTemplates();
-		this.templateNames = RoleTemplates.getAllTemplateNames();
+		this.templates = TemplateManager.getAllTemplates();
 		nextStep = new RunPermDiscRoleSetupStep();
 	}
 
@@ -41,11 +39,11 @@ public class RunRoleSetupTemplateStep implements CreationStep {
 
         try {
             int choiceId = Integer.parseInt(e.getMessage().getRawContent()) - 1;
-            if (choiceId == templateNames.size()) { // user chose to add roles manually
+            if (choiceId == templates.size()) { // user chose to add roles manually
                 nextStep = new RunRoleSetupManualStep();
                 return true;
             } else {
-            	raid.addTemplateRoles(templates.get(choiceId));
+                raid.addTemplateRoles(templates.get(choiceId).getRoles().values());
                 return true;
             }
         } catch (Exception exp) {
@@ -59,11 +57,11 @@ public class RunRoleSetupTemplateStep implements CreationStep {
      */
     public String getStepText() {
         String message = "Choose from these available role templates or go back to manual role creation: \n";
-        for (int i = 0; i < templateNames.size(); i++) {
-        	message += "`" + (i+1) + "` " + RoleTemplates.templateToString(templateNames.get(i), templates.get(i)) + "\n";
+        for (int i = 0; i < templates.size(); i++) {
+            message += "`" + (i+1) + "` " + templates.get(i) + "\n";
         }
         
-        return message + "`" + (templateNames.size()+1) + "` add roles manually";
+        return message + "`" + (templates.size()+1) + "` add roles manually";
     }
 
     /**

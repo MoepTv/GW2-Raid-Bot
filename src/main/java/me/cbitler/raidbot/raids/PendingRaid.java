@@ -1,6 +1,7 @@
 package me.cbitler.raidbot.raids;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -129,12 +130,11 @@ public class PendingRaid {
 		return false;
 	}
 
-	public void addTemplateRoles(RaidRole[] raidRoles) {
-		for (int r = 0; r < raidRoles.length; r++) {
-        	RaidRole role = raidRoles[r];
+    public void addTemplateRoles(Collection<RaidRole> raidRoles) {
+        for (RaidRole role : raidRoles) {
             rolesWithNumbers.add(new RaidRole(role.getAmount(), role.getName()));
         }
-	}
+    }
 
 	public void addPermittedDiscordRoles(String role) {
 		permittedDiscordRoles.add(role);

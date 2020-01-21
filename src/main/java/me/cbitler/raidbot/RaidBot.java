@@ -1,5 +1,7 @@
 package me.cbitler.raidbot;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import me.cbitler.raidbot.commands.*;
 import me.cbitler.raidbot.creation.CreationStep;
 import me.cbitler.raidbot.edit.EditStep;
@@ -11,6 +13,7 @@ import me.cbitler.raidbot.handlers.DMHandler;
 import me.cbitler.raidbot.handlers.ReactionHandler;
 import me.cbitler.raidbot.raids.PendingRaid;
 import me.cbitler.raidbot.raids.RaidManager;
+import me.cbitler.raidbot.raids.templates.TemplateManager;
 import me.cbitler.raidbot.selection.SelectionStep;
 import me.cbitler.raidbot.swap.SwapStep;
 import me.cbitler.raidbot.utility.GuildCountUtil;
@@ -19,7 +22,10 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -72,6 +78,7 @@ public class RaidBot {
         jda.addEventListener(new DMHandler(this), new ChannelMessageHandler(), new ReactionHandler());
         db = new Database("events.db");
         db.connect();
+        TemplateManager.loadTemplates();
         RaidManager.loadRaids();
 
         CommandRegistry.addCommand("help", new HelpCommand());
@@ -193,6 +200,36 @@ public class RaidBot {
      */
     public Database getDatabase() {
         return db;
+    }
+
+    /**
+     * Save a resource from the jar to the directory the bot runs in.
+     * @param name The name of the resource to save
+     */
+    public void saveResource(String name) {
+        InputStream inputStream = getClass().getResourceAsStream("/" + name);
+        if (inputStream != null) {
+            File file = new File(name);
+            if (!file.exists()) {
+                try {
+                    Files.copy(inputStream, file.toPath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            log(Level.WARNING, "No resource " + name + " found!");
+        }
+    }
+
+    /**
+     * Save a config by a certain name to the bot's directory and load it.
+     * @param name The name of the config
+     * @return The loaded config, using the one from inside the jar as the fallback.
+     */
+    public Config getConfig(String name) {
+        saveResource(name + ".conf");
+        return ConfigFactory.parseFile(new File(name + ".conf")).withFallback(ConfigFactory.load(name + ".conf"));
     }
 
     /**

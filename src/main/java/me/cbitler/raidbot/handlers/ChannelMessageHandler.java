@@ -9,12 +9,15 @@ import me.cbitler.raidbot.edit.EditStep;
 import me.cbitler.raidbot.edit.EditIdleStep;
 import me.cbitler.raidbot.raids.Raid;
 import me.cbitler.raidbot.raids.RaidManager;
+import me.cbitler.raidbot.raids.templates.Template;
+import me.cbitler.raidbot.raids.templates.TemplateManager;
 import me.cbitler.raidbot.utility.PermissionsUtil;
-import me.cbitler.raidbot.utility.RoleTemplates;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+
+import java.util.List;
 
 /**
  * Handle channel message-related events sent to the bot
@@ -176,11 +179,11 @@ public class ChannelMessageHandler extends ListenerAdapter {
             	String helpMessageAccum = "Correct format: !createFractal [name];[date];[time];[team comp id]\n"
             			+ "Enter the information without brackets, for example: !createFractal CMs+T4;13.04.19;13:37 CEST;1\n"
             			+ "Available team compositions:\n";
-            	String[] templNames = RoleTemplates.getFractalTemplateNames();
-            	for (int t = 0; t < templNames.length; t++) {
-            		helpMessageAccum += "`" + (t+1) + "` " + RoleTemplates.templateToString(templNames[t], RoleTemplates.getFractalTemplates()[t]) + "\n";
-            	}
-            	String helpMessage = helpMessageAccum; // otherwise the lambda for sending the message is unhappy because var not effectively final
+                List<Template> templates = TemplateManager.getFractalTemplates();
+                for (int t = 0; t < templates.size(); t++) {
+                    helpMessageAccum += "`" + (t+1) + "` " + templates.get(t) + "\n";
+                }
+                String helpMessage = helpMessageAccum; // otherwise the lambda for sending the message is unhappy because var not effectively final
                 
                 if(split.length < 4) {
             		e.getAuthor().openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Incorrect number of arguments provided.").queue());
@@ -194,7 +197,7 @@ public class ChannelMessageHandler extends ListenerAdapter {
                 	} catch (Exception excp) {
                 		validTeamComp = false;
                 	}
-                	if (teamCompId >= RoleTemplates.getFractalTemplateNames().length)
+                	if (teamCompId >= TemplateManager.getFractalTemplates().size())
                 		validTeamComp = false;
                 	if (validTeamComp == false) {
                 		e.getAuthor().openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Provided team comp id is invalid.").queue());

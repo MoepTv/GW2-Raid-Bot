@@ -3,8 +3,8 @@ package me.cbitler.raidbot.raids;
 import me.cbitler.raidbot.RaidBot;
 import me.cbitler.raidbot.database.Database;
 import me.cbitler.raidbot.database.QueryResult;
+import me.cbitler.raidbot.raids.templates.TemplateManager;
 import me.cbitler.raidbot.utility.Reactions;
-import me.cbitler.raidbot.utility.RoleTemplates;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.*;
 
@@ -52,7 +52,7 @@ public class RaidManager {
                             emoteList = Reactions.getOpenWorldEmotes();
                         else
                             emoteList = Reactions.getCoreClassEmotes();
-                        
+
                         try {
                         	for (Emote emote : emoteList)
                         		message1.addReaction(emote).complete(); // complete will block until the reaction was added -> reactions are always in same order
@@ -69,7 +69,7 @@ public class RaidManager {
             }
         }
     }
-    
+
     /**
      * Create a fractal event
      * @param name
@@ -78,28 +78,28 @@ public class RaidManager {
      * @param teamCompId
      */
     public static void createFractal(User author, String serverId, String name, String date, String time, int teamCompId) {
-		// TODO Auto-generated method stub
-		PendingRaid fractalEvent = new PendingRaid();
-		fractalEvent.setLeaderId(author.getId());
-        fractalEvent.setServerId(serverId);		
+        // TODO Auto-generated method stub
+        PendingRaid fractalEvent = new PendingRaid();
+        fractalEvent.setLeaderId(author.getId());
+        fractalEvent.setServerId(serverId);
         fractalEvent.setName(name);
-		fractalEvent.setDescription("-");
-		fractalEvent.setDate(date);
-		fractalEvent.setTime(time);
-		fractalEvent.setDisplayShort(true);
-		fractalEvent.setFractalEvent(true);
-		fractalEvent.addTemplateRoles(RoleTemplates.getFractalTemplates()[teamCompId]);
-		
-		String fractalChannel = RaidBot.getInstance().getFractalChannel(serverId);
-		if (RaidBot.getInstance().checkChannel(fractalEvent.getServerId(), fractalChannel)) {
-			fractalEvent.setAnnouncementChannel(fractalChannel);
-		} else {
-			author.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("The specified fractal channel is invalid. It needs to be set with !setFractalChannel [channelname without hash] by someone with MANAGE SERVER permissions.").queue());
-			return;
-		}
-		createRaid(fractalEvent);
-	}
-      
+        fractalEvent.setDescription("-");
+        fractalEvent.setDate(date);
+        fractalEvent.setTime(time);
+        fractalEvent.setDisplayShort(true);
+        fractalEvent.setFractalEvent(true);
+        fractalEvent.addTemplateRoles(TemplateManager.getFractalTemplates().get(teamCompId).getRoles().values());
+
+        String fractalChannel = RaidBot.getInstance().getFractalChannel(serverId);
+        if (RaidBot.getInstance().checkChannel(fractalEvent.getServerId(), fractalChannel)) {
+        	fractalEvent.setAnnouncementChannel(fractalChannel);
+        } else {
+        	author.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("The specified fractal channel is invalid. It needs to be set with !setFractalChannel [channelname without hash] by someone with MANAGE SERVER permissions.").queue());
+        	return;
+        }
+        createRaid(fractalEvent);
+    }
+
     /**
      * Insert a raid into the database
      * @param raid The raid to insert
@@ -116,8 +116,8 @@ public class RaidManager {
         String permDiscRoles = formatStringListForDatabase(raid.getPermittedDiscordRoles());
         try {
             db.update("INSERT INTO `raids` (`raidId`, `serverId`, `channelId`, `isDisplayShort`, `isOpenWorld`, `isFractalEvent`, "
-            		+ "`leader`, `name`, `description`, `date`, `time`, `roles`, `permittedRoles`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", 
-            		new String[] {
+                    + "`leader`, `name`, `description`, `date`, `time`, `roles`, `permittedRoles`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    new String[] {
                     messageId,
                     serverId,
                     channelId,
@@ -174,17 +174,17 @@ public class RaidManager {
                 try {
                     isOpenWorld = results.getResults().getString("isOpenWorld").equals("true");
                 } catch (Exception e) { }
-                
+
                 boolean isDisplayShort = false;
                 try {
                 	isDisplayShort = results.getResults().getString("isDisplayShort").equals("true");
                 } catch (Exception e) { }
-                
+
                 boolean isFractalEvent = false;
                 try {
                 	isFractalEvent = results.getResults().getString("isFractalEvent").equals("true");
                 } catch (Exception e) { }
-                
+
                 List<String> permDiscRoles = new ArrayList<String>();
                 try {
                 	String permRolesText = results.getResults().getString("permittedRoles");
@@ -201,7 +201,7 @@ public class RaidManager {
                         raid.roles.add(new RaidRole(amnt, role));
                     } catch (NumberFormatException excp) {
                         RaidBot.log(Level.SEVERE, "Invalid format for role with amount: " + roleAndAmount + ". " + excp.getMessage());
-                    }                    
+                    }
                 }
                 if (raid.roles.size() > 0) // this should always be the case
                 	raids.add(raid);
@@ -261,19 +261,19 @@ public class RaidManager {
     /**
      * Delete the raid from the database and maps, and delete the message if it is still there
      * @param messageId The raid ID
-     * @param whether the original message should be deleted
+     * @param delete_message whether the original message should be deleted
      * @return true if deleted, false if not deleted
      */
     public static boolean deleteRaid(String messageId, boolean delete_message) {
         Raid r = getRaid(messageId);
         if (r != null) {
-        	if (delete_message) {
-        		try {
-        			RaidBot.getInstance().getServer(r.getServerId())
-        			.getTextChannelById(r.getChannelId()).getMessageById(messageId).queue(message -> message.delete().queue());
-        		} catch (Exception e) {
-        			// Nothing, the message doesn't exist - it can happen
-        		}
+            if (delete_message) {
+                try {
+                    RaidBot.getInstance().getServer(r.getServerId())
+                            .getTextChannelById(r.getChannelId()).getMessageById(messageId).queue(message -> message.delete().queue());
+                } catch (Exception e) {
+                    // Nothing, the message doesn't exist - it can happen
+                }
             }
 
             Iterator<Raid> raidIterator = raids.iterator();
@@ -317,7 +317,7 @@ public class RaidManager {
         }
         return null;
     }
-    
+
     /**
      * Get all raids
      * @return The list of all raid objects.
@@ -359,9 +359,9 @@ public class RaidManager {
         String data = "";
 
         for (int i = 0; i < stringList.size(); i++) {
-        	data += stringList.get(i);
+            data += stringList.get(i);
             if (i != stringList.size() - 1) {
-            	// add a comma if it is not the last element
+                // add a comma if it is not the last element
                 data += ",";
             }
         }
@@ -391,7 +391,7 @@ public class RaidManager {
      * @return The embedded message
      */
     private static MessageEmbed buildEmbedShort(PendingRaid raid) {
-    	EmbedBuilder builder = new EmbedBuilder();
+        EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle(raid.getName() + " - [" + raid.getDate() + " " + raid.getTime() + "]");
 
         return builder.build();
@@ -429,6 +429,6 @@ public class RaidManager {
      * @return the maximum number of roles per user
      */
     public static int getMaxNumRoles() {
-    	return 4;
+        return 4;
     }
 }
