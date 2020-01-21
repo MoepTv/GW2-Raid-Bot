@@ -10,7 +10,7 @@ import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
  * @author Franziska Mueller
  */
 public class RunChannelStep implements CreationStep {
-    static String[] defaultChannels = { "board-of-adventures", "banner-of-tactics", "gw2-raid-bot", "test" };
+    static String[] defaultChannels = {"termine-events"};
 	boolean enterManually;
     
 	public RunChannelStep() {
