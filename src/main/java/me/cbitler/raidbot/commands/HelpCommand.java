@@ -4,7 +4,7 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 
 public class HelpCommand implements Command {
-    private final String helpMessage = "Riz-GW2-Event-Bot Help:\n" +
+    private final String helpMessage = "SC-GW2-Event-Bot Help:\n" +
             "General commands:\n" +
             "**!createEvent** - Start the event creation process. Usable by people with the event manager role.\n" +
             "**!editEvent [event id]** - Start the event edit process. Usable by people with then event manager role.\n" +
