@@ -27,7 +27,7 @@ public class TemplateManager {
 
     private static Map<String, Template> loadTemplates(Config config, String type) {
         Map<String, Template> templates = new LinkedHashMap<>();
-        for (Map.Entry<String, ConfigValue> entry : config.getConfig(type).entrySet()) {
+        for (Map.Entry<String, ConfigValue> entry : config.getConfig(type).root().entrySet()) {
             Template template = new Template(entry.getKey(), ((ConfigObject) entry.getValue()).toConfig());
             templates.put(template.getId(), template);
         }

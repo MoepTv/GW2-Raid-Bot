@@ -17,7 +17,7 @@ public class Template {
 
     public Template(String name, Config config) {
         this.name = name;
-        for (Map.Entry<String, ConfigValue> entry : config.entrySet()) {
+        for (Map.Entry<String, ConfigValue> entry : config.root().entrySet()) {
             RaidRole role = new RaidRole(config.getInt(entry.getKey()), entry.getKey());
             roles.put(role.getName().toLowerCase(), role);
         }
